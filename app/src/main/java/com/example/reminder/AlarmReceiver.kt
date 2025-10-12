@@ -3,6 +3,7 @@ package com.example.reminder
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.os.PowerManager
 import android.widget.Toast
@@ -16,20 +17,37 @@ class AlarmReceiver : BroadcastReceiver() {
         wl.setReferenceCounted(false)
         wl.acquire(15_000L) // hold up to 15s
 
-        val mp = MediaPlayer.create(context.applicationContext, R.raw.alert)
-        mp?.setOnCompletionListener {
+        val mp = MediaPlayer()
+        mp.setOnCompletionListener {
             try { it.release() } catch (_: Exception) {}
             if (wl.isHeld) wl.release()
         }
-        mp?.setOnErrorListener { player, _, _ ->
+        mp.setOnErrorListener { player, _, _ ->
             try { player.release() } catch (_: Exception) {}
             if (wl.isHeld) wl.release()
             true
         }
 
         try {
-            mp?.start()
+            // 🔊 Use Alarm stream (Alarm volume slider)
+            mp.setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+            )
+
+            val afd = context.resources.openRawResourceFd(R.raw.alert) ?: run {
+                if (wl.isHeld) wl.release()
+                return
+            }
+            mp.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+            afd.close()
+
+            mp.prepare()
+            mp.start()
         } catch (_: Exception) {
+            try { mp.release() } catch (_: Exception) {}
             if (wl.isHeld) wl.release()
         }
 
@@ -39,12 +57,10 @@ class AlarmReceiver : BroadcastReceiver() {
         // Schedule the next alarm based on current time and stored schedule
         AlarmScheduler.scheduleAlarms(context)
 
-
         val updateIntent = Intent("com.example.reminder.UPDATE_NEXT_ALARM").apply {
             setPackage(context.packageName)
         }
         context.sendBroadcast(updateIntent)
-
     }
 
     companion object {

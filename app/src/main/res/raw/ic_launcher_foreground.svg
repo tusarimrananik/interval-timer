@@ -1,0 +1,13 @@
+<svg width="432" height="432" viewBox="0 0 432 432" xmlns="http://www.w3.org/2000/svg">
+  <g fill="#FFFFFF">
+    <circle cx="216" cy="72" r="18"/>
+    <path d="M216 96
+             A120 120 0 0 1 336 216
+             L336 288
+             Q216 336 96 288
+             L96 216
+             A120 120 0 0 1 216 96
+             Z"/>
+    <circle cx="216" cy="312" r="24"/>
+  </g>
+</svg>
