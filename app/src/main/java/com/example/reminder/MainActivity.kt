@@ -52,9 +52,10 @@ private fun ReminderScreen() {
         android.text.format.DateFormat.format("hh:mm a", millis).toString()
     } ?: "—"
 
-    val soundOptions = listOf("sound1", "sound2", "sound3")
+    val soundOptions = listOf( "short_alert", "alert_alarm", "classic_alarm", "game_notification",)
     var selectedSound by remember { mutableStateOf(AlarmScheduler.loadSound(context)) }
     var expanded by remember { mutableStateOf(false) }
+
 
     // Broadcast receiver to update next alarm dynamically
     DisposableEffect(Unit) {

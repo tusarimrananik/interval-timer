@@ -29,24 +29,35 @@ class AlarmReceiver : BroadcastReceiver() {
         }
 
         try {
+            // 🔊 Use Alarm stream (controlled by the Alarm volume slider)
+            mp.setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+            )
+
+            // 1. Get the saved filename (e.g., "sound2") from SharedPreferences
             val soundName = AlarmScheduler.loadSound(context)
 
-            // Dynamically find the resource ID by name
+            // 2. Dynamically find the integer ID (R.raw.sound2) using the filename string
             val resId = context.resources.getIdentifier(soundName, "raw", context.packageName)
 
-            if (resId == 0) {
-                // Fallback if sound not found
+            // 3. Safety check: If the file doesn't exist, resId will be 0
+            if (resId != 0) {
+                val afd = context.resources.openRawResourceFd(resId)
+                mp.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+                afd.close()
+
+                mp.prepare()
+                mp.start()
+            } else {
+                // Fallback: If the saved sound is missing, release the lock so the battery doesn't drain
                 if (wl.isHeld) wl.release()
-                return
             }
 
-            val afd = context.resources.openRawResourceFd(resId)
-            mp.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
-            afd.close()
-
-            mp.prepare()
-            mp.start()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            e.printStackTrace()
             try { mp.release() } catch (_: Exception) {}
             if (wl.isHeld) wl.release()
         }
