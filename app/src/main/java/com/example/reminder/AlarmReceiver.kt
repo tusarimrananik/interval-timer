@@ -29,18 +29,18 @@ class AlarmReceiver : BroadcastReceiver() {
         }
 
         try {
-            // 🔊 Use Alarm stream (Alarm volume slider)
-            mp.setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_ALARM)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .build()
-            )
+            val soundName = AlarmScheduler.loadSound(context)
 
-            val afd = context.resources.openRawResourceFd(R.raw.alert) ?: run {
+            // Dynamically find the resource ID by name
+            val resId = context.resources.getIdentifier(soundName, "raw", context.packageName)
+
+            if (resId == 0) {
+                // Fallback if sound not found
                 if (wl.isHeld) wl.release()
                 return
             }
+
+            val afd = context.resources.openRawResourceFd(resId)
             mp.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
             afd.close()
 

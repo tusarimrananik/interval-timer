@@ -52,6 +52,10 @@ private fun ReminderScreen() {
         android.text.format.DateFormat.format("hh:mm a", millis).toString()
     } ?: "—"
 
+    val soundOptions = listOf("sound1", "sound2", "sound3")
+    var selectedSound by remember { mutableStateOf(AlarmScheduler.loadSound(context)) }
+    var expanded by remember { mutableStateOf(false) }
+
     // Broadcast receiver to update next alarm dynamically
     DisposableEffect(Unit) {
         val receiver = object : BroadcastReceiver() {
@@ -123,6 +127,31 @@ private fun ReminderScreen() {
             Text("$interval min", style = MaterialTheme.typography.bodyLarge)
             Button(onClick = { interval++ }) { Text("+") }
         }
+
+
+        // Inside your Column, before the "Save & Schedule" button:
+        Box(modifier = Modifier.fillMaxWidth().wrapContentSize(Alignment.TopStart)) {
+            OutlinedButton(onClick = { expanded = true }) {
+                Text("Sound: $selectedSound")
+            }
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                soundOptions.forEach { sound ->
+                    DropdownMenuItem(
+                        text = { Text(sound) },
+                        onClick = {
+                            selectedSound = sound
+                            AlarmScheduler.saveSound(context, sound)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+
+
 
         // Save & Cancel
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {

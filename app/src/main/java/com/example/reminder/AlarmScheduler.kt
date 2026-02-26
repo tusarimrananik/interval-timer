@@ -190,6 +190,21 @@ object AlarmScheduler {
 
     // ---- SharedPreferences keys ----
 
+
+
+    fun saveSound(context: Context, soundName: String) {
+        context.getSharedPreferences("reminder_prefs", Context.MODE_PRIVATE).edit {
+            putString(KEY_SOUND, soundName)
+        }
+    }
+
+    fun loadSound(context: Context): String {
+        val prefs = context.getSharedPreferences("reminder_prefs", Context.MODE_PRIVATE)
+        return prefs.getString(KEY_SOUND, DEFAULT_SOUND) ?: DEFAULT_SOUND
+    }
+
+
+
     private const val PREFS = "reminder_prefs"
 
     @Suppress("SpellCheckingInspection")
@@ -199,4 +214,10 @@ object AlarmScheduler {
     private const val KEY_END = "end_hhmm"
 
     private const val KEY_INTERVAL = "interval_minutes"
+
+
+
+
+    private const val KEY_SOUND = "selected_sound"
+    private const val DEFAULT_SOUND = "sound1" // matches your filename in res/raw
 }
