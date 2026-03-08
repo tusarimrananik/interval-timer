@@ -118,10 +118,10 @@ private fun ReminderScreen() {
 
     var start by rememberSaveable { mutableStateOf(savedSchedule?.start?.toString() ?: "05:00") }
     var end by rememberSaveable { mutableStateOf(savedSchedule?.end?.toString() ?: "00:00") }
-    var interval by rememberSaveable { mutableStateOf(savedSchedule?.intervalMinutes ?: 45L) }
+    var interval by rememberSaveable { mutableStateOf(savedSchedule?.intervalMinutes ?: 60L) }
 
     var commentAction by rememberSaveable {
-        mutableStateOf(AlarmScheduler.loadCommentTask(context).ifEmpty { "1" })
+        mutableStateOf(AlarmScheduler.loadCommentTask(context).ifEmpty { "3" })
     }
 
     var nextAlarmTime by remember {
@@ -804,7 +804,7 @@ private fun ActionBar(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "DO #$actionText comments in every $interval mins",
+                text = "Do $actionText comments in every $interval minutes",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
